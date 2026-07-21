@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wibu Academy - Flashcards</title>
+  <style>
+    /* Mengimpor Font gaya Anime/Komik dari Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Potta+One&display=swap');
+
+    :root {
+      /* Palet Warna Anime (Cerah & Kontras) */
+      --primary-color: #ff6b6b; /* Merah Muda Janda */
+      --secondary-color: #4ecdc4; /* Cyan Toska */
+      --accent-color: #ffe66d; /* Kuning Cerah */
+      --bg-color: #f7fff7; /* Putih Tulang */
+      --text-main: #2f3e46; /* Abu Gelap */
+      --card-front-bg: #ffffff;
+      --card-back-bg: #fff3f3; /* Pink Sangat Muda */
+      
+      /* Font Setup */
+      --font-header: 'Potta One', cursive; /* Untuk Judul */
+      --font-body: 'Kosugi Maru', sans-serif; /* Untuk Konten */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      /* Latar belakang pola sederhana gaya anime */
+      background-image: 
+        radial-gradient(var(--secondary-color) 0.5px, transparent 0.5px),
+        radial-gradient(var(--secondary-color) 0.5px, var(--bg-color) 0.5px);
+      background-size: 20px 20px;
+      background-position: 0 0,10px 10px;
+      opacity: 0.9;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      position: relative;
+    }
+
+    /* Header Gaya Anime */
+    .header {
+      text-align: center;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 3px solid var(--text-main);
+      box-shadow: 5px 5px 0px var(--text-main);
+    }
+
+    .header h1 {
+      font-family: var(--font-header);
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      -webkit-text-stroke: 1px var(--text-main);
+      text-shadow: 2px 2px 0px var(--accent-color);
+    }
+
+    .progress {
+      font-size: 0.9rem;
+      color: var(--text-main);
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    /* Flashcard Container & Flip Effect */
+    .flashcard-container {
+      width: 100%;
+      height: 300px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .flashcard {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Efek membalik membal (bouncy) */
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    /* Gaya Muka Kartu */
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 35px;
+      text-align: center;
+      /* Border tebal gaya Manga */
+      border: 4px solid var(--text-main);
+      /* Bayangan tajam gaya pop-art */
+      box-shadow: 8px 8px 0px rgba(0,0,0,0.15);
+    }
+
+    /* Bagian Depan (Pertanyaan) */
+    .card-front {
+      background-color: var(--card-front-bg);
+      color: var(--text-main);
+    }
+
+    /* Bagian Belakang (Jawaban) */
+    .card-back {
+      background-color: var(--card-back-bg);
+      color: var(--primary-color);
+      transform: rotateY(180deg);
+      background-image: linear-gradient(45deg, #fff3f3 25%, transparent 25%, transparent 75%, #fff3f3 75%, #fff3f3), linear-gradient(45deg, #fff3f3 25%, transparent 25%, transparent 75%, #fff3f3 75%, #fff3f3);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+
+    /* Label Pojok */
+    .card-label {
+      position: absolute;
+      top: 15px;
+      left: -10px; /* Sedikit keluar dari kartu */
+      background: var(--secondary-color);
+      color: white;
+      padding: 5px 15px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      border: 2px solid var(--text-main);
+      border-radius: 5px;
+      transform: rotate(-5deg);
+    }
+    
+    .card-back .card-label {
+      background: var(--primary-color);
+    }
+
+    /* Teks Konten */
+    .card-content {
+      font-size: 1.4rem;
+      font-weight: bold;
+      line-height: 1.4;
+      margin-top: 20px;
+    }
+
+    /* Petunjuk di Bawah */
+    .hint {
+      position: absolute;
+      bottom: 15px;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    /* Tombol Navigasi */
+    .controls {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: var(--accent-color);
+      color: var(--text-main);
+      border: 3px solid var(--text-main);
+      padding: 12px 24px;
+      border-radius: 15px;
+      font-size: 1rem;
+      font-weight: bold;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      max-width: 160px;
+      box-shadow: 4px 4px 0px var(--text-main);
+      position: relative;
+      top: 0;
+    }
+
+    button:hover {
+      background-color: #ffdb3a;
+      top: -2px;
+      box-shadow: 6px 6px 0px var(--text-main);
+    }
+
+    button:active {
+      top: 3px;
+      box-shadow: 1px 1px 0px var(--text-main);
+    }
+
+    button:disabled {
+      background-color: #e0e0e0;
+      color: #a0a0a0;
+      border-color: #a0a0a0;
+      cursor: not-allowed;
+      box-shadow: 2px 2px 0px #a0a0a0;
+      top: 0;
+    }
+
+    .btn-prev {
+      background-color: #a29bfe; /* Ungu Muda */
+      color: white;
+    }
+    .btn-prev:hover {
+      background-color: #6c5ce7;
+    }
+
+    /* Dekorasi Tambahan (Opsional, untuk nuansa anime lebih kental) */
+    .decor-star {
+      position: absolute;
+      font-size: 2rem;
+      color: var(--accent-color);
+      opacity: 0.5;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dekorasi Latar Belakang -->
+  <div class="decor-star" style="top: 10%; left: 10%;">★</div>
+  <div class="decor-star" style="bottom: 15%; right: 10%;">✧</div>
+
+  <div class="container">
+    <div class="header">
+      <h1>Wibu Academy</h1>
+      <div class="progress" id="progress">Kartu 1 / 4</div>
+    </div>
+
+    <!-- Flashcard -->
+    <div class="flashcard-container" id="cardContainer">
+      <div class="flashcard" id="flashcard">
+        <!-- Depan -->
+        <div class="card-face card-front">
+          <span class="card-label">Tanya! ( ・∀・)っ</span>
+          <div class="card-content" id="questionText">Memuat Waifu... eh, pertanyaan...</div>
+          <span class="hint">Klik untuk melihat jawaban 🔄</span>
+        </div>
+        <!-- Belakang -->
+        <div class="card-face card-back">
+          <span class="card-label">Jawab! (💡)</span>
+          <div class="card-content" id="answerText">Memuat jawaban...</div>
+          <span class="hint">Klik untuk kembali 🔄</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tombol Navigasi -->
+    <div class="controls">
+      <button class="btn-prev" id="prevBtn">👈 Mundur</button>
+      <button class="btn-next" id="nextBtn">Maju 👉</button>
+    </div>
+  </div>
+
+  <script>
+    // Data Flashcard Tema Anime/Jepang
+    const flashcards = [
+      {
+        question: "Apa arti dari kata 'Konnichiwa' (こんにちは)?",
+        answer: "Selamat Siang / Halo"
+      },
+      {
+        question: "Siapa karakter utama dalam anime 'Naruto'?",
+        answer: "Naruto Uzumaki"
+      },
+      {
+        question: "Apa studio animasi yang memproduksi film 'Spirited Away'?",
+        answer: "Studio Ghibli"
+      },
+      {
+        question: "Sebutkan genre anime yang menceritakan karakter pergi ke dunia lain!",
+        answer: "Isekai"
+      },
+      {
+        question: "Apa nama pedang ikonik yang digunakan Roronoa Zoro di One Piece (salah satunya)?",
+        answer: "Wado Ichimonji / Shusui / Enma"
+      }
+    ];
+
+    let currentIndex = 0;
+
+    // Element DOM
+    const flashcard = document.getElementById('flashcard');
+    const cardContainer = document.getElementById('cardContainer');
+    const questionText = document.getElementById('questionText');
+    const answerText = document.getElementById('answerText');
+    const progressText = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // Update konten kartu
+    function updateCard() {
+      // Kembalikan kartu ke posisi depan tanpa animasi jika ganti soal
+      flashcard.style.transition = 'none';
+      flashcard.classList.remove('flipped');
+      
+      // Beri sedikit jeda sebelum update teks agar tidak terlihat 'tembus'
+      setTimeout(() => {
+        questionText.textContent = flashcards[currentIndex].question;
+        answerText.textContent = flashcards[currentIndex].answer;
+        progressText.textContent = `Kartu ${currentIndex + 1} / ${flashcards.length}`;
+
+        // Atur status tombol
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === flashcards.length - 1;
+        
+        // Kembalikan animasi transisi
+        flashcard.style.transition = 'transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+      }, 100);
+    }
+
+    // Event Listener untuk membalik kartu saat diklik
+    cardContainer.addEventListener('click', () => {
+      flashcard.classList.toggle('flipped');
+    });
+
+    // Event Listener tombol Selanjutnya
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Mencegah kartu terbalik saat tombol diklik
+      if (currentIndex < flashcards.length - 1) {
+        currentIndex++;
+        updateCard();
+      }
+    });
+
+    // Event Listener tombol Sebelumnya
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Mencegah kartu terbalik saat tombol diklik
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCard();
+      }
+    });
+
+    // Inisialisasi pertama kali
+    updateCard();
+  </script>
+</body>
+</html>

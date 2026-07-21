@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wibu Academy - Flashcards</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Potta+One&display=swap');
+
+    :root {
+      --primary-color: #ff6b6b;
+      --secondary-color: #4ecdc4;
+      --accent-color: #ffe66d;
+      --bg-color: #f7fff7;
+      --text-main: #2f3e46;
+      --card-front-bg: #ffffff;
+      --card-back-bg: #fff3f3;
+      --font-header: 'Potta One', 'Trebuchet MS', sans-serif;
+      --font-body: 'Kosugi Maru', 'Segoe UI', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-image: 
+        radial-gradient(var(--secondary-color) 0.8px, transparent 0.8px),
+        radial-gradient(var(--secondary-color) 0.8px, var(--bg-color) 0.8px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      background: white;
+      padding: 10px 24px;
+      border-radius: 50px;
+      border: 3px solid var(--text-main);
+      box-shadow: 4px 4px 0px var(--text-main);
+    }
+
+    .header h1 {
+      font-family: var(--font-header);
+      font-size: 1.6rem;
+      color: var(--primary-color);
+    }
+
+    .progress {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    /* Container Kartu */
+    .flashcard-container {
+      width: 100%;
+      height: 280px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .flashcard {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    /* Muka Kartu */
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      border: 4px solid var(--text-main);
+      box-shadow: 6px 6px 0px rgba(0,0,0,0.12);
+    }
+
+    .card-front {
+      background-color: var(--card-front-bg);
+      color: var(--text-main);
+    }
+
+    .card-back {
+      background-color: var(--card-back-bg);
+      color: var(--primary-color);
+      transform: rotateY(180deg);
+    }
+
+    /* Label */
+    .card-label {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: var(--secondary-color);
+      color: white;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border: 2px solid var(--text-main);
+      border-radius: 6px;
+    }
+    
+    .card-back .card-label {
+      background: var(--primary-color);
+    }
+
+    .card-content {
+      font-size: 1.3rem;
+      font-weight: bold;
+      line-height: 1.4;
+      margin-top: 15px;
+    }
+
+    .hint {
+      position: absolute;
+      bottom: 12px;
+      font-size: 0.75rem;
+      color: var(--text-main);
+      opacity: 0.7;
+    }
+
+    /* Tombol */
+    .controls {
+      display: flex;
+      gap: 15px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    button {
+      background-color: var(--accent-color);
+      color: var(--text-main);
+      border: 3px solid var(--text-main);
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      font-family: var(--font-body);
+      cursor: pointer;
+      flex: 1;
+      max-width: 150px;
+      box-shadow: 3px 3px 0px var(--text-main);
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 5px 5px 0px var(--text-main);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 1px 1px 0px var(--text-main);
+    }
+
+    button:disabled {
+      background-color: #e0e0e0;
+      color: #999;
+      border-color: #999;
+      box-shadow: 2px 2px 0px #999;
+      cursor: not-allowed;
+    }
+
+    .btn-prev {
+      background-color: #a29bfe;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Wibu Academy</h1>
+      <div class="progress" id="progress">Kartu 1 / 5</div>
+    </div>
+
+    <!-- Flashcard -->
+    <div class="flashcard-container" id="cardContainer">
+      <div class="flashcard" id="flashcard">
+        <div class="card-face card-front">
+          <span class="card-label">Pertanyaan</span>
+          <div class="card-content" id="questionText">Memuat...</div>
+          <span class="hint">Klik untuk membalik 🔄</span>
+        </div>
+        <div class="card-face card-back">
+          <span class="card-label">Jawaban</span>
+          <div class="card-content" id="answerText">Memuat...</div>
+          <span class="hint">Klik untuk kembali 🔄</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigasi -->
+    <div class="controls">
+      <button class="btn-prev" id="prevBtn">👈 Mundur</button>
+      <button id="nextBtn">Maju 👉</button>
+    </div>
+  </div>
+
+  <script>
+    const flashcards = [
+      {
+        question: "Apa arti dari kata 'Konnichiwa' (こんにちは)?",
+        answer: "Selamat Siang / Halo"
+      },
+      {
+        question: "Siapa karakter utama dalam anime 'Naruto'?",
+        answer: "Naruto Uzumaki"
+      },
+      {
+        question: "Apa studio animasi yang memproduksi film 'Spirited Away'?",
+        answer: "Studio Ghibli"
+      },
+      {
+        question: "Sebutkan genre anime tentang karakter yang pergi ke dunia lain!",
+        answer: "Isekai"
+      },
+      {
+        question: "Apa nama pedang ikonik milik Roronoa Zoro di One Piece?",
+        answer: "Wado Ichimonji / Enma"
+      }
+    ];
+
+    let currentIndex = 0;
+
+    const flashcard = document.getElementById('flashcard');
+    const cardContainer = document.getElementById('cardContainer');
+    const questionText = document.getElementById('questionText');
+    const answerText = document.getElementById('answerText');
+    const progressText = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function renderContent() {
+      questionText.textContent = flashcards[currentIndex].question;
+      answerText.textContent = flashcards[currentIndex].answer;
+      progressText.textContent = `Kartu ${currentIndex + 1} / ${flashcards.length}`;
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === flashcards.length - 1;
+    }
+
+    function changeCard(newIndex) {
+      // Jika kartu sedang dalam keadaan terbalik (terbuka jawabannya)
+      if (flashcard.classList.contains('flipped')) {
+        flashcard.classList.remove('flipped');
+        // Tunggu animasi balik selesai baru ganti teks
+        setTimeout(() => {
+          currentIndex = newIndex;
+          renderContent();
+        }, 250);
+      } else {
+        currentIndex = newIndex;
+        renderContent();
+      }
+    }
+
+    // Klik kartu untuk membalik
+    cardContainer.addEventListener('click', () => {
+      flashcard.classList.toggle('flipped');
+    });
+
+    // Tombol Navigasi
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentIndex < flashcards.length - 1) {
+        changeCard(currentIndex + 1);
+      }
+    });
+
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentIndex > 0) {
+        changeCard(currentIndex - 1);
+      }
+    });
+
+    // Jalankan awal
+    renderContent();
+  </script>
+</body>
+</html>
